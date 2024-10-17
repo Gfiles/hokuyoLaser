@@ -181,7 +181,7 @@ def animate_radar(stopEvent):
 		image = cv2.line(backGround, (x2, y2), (x3, y3), green, 3)
 		image = cv2.line(backGround, (x3, y3), (x4, y4), green, 3)
 		image = cv2.line(backGround, (x4, y4), (x1, y1), green, 3)
-
+		
 		# end Square Draw
 
 		ang = []
@@ -224,19 +224,21 @@ def animate_radar(stopEvent):
 					lineArray.append((x, y))
 					image = cv2.line(backGround, lineArray[i], (x, y), red, 2)
 					i += 1
-				# Create Points
-				if abs(dist - lastDist) < maxSize:
-					pointsAng.append(ang)
-					pointsDist.append(dist)
-				else:
-					if	100 > len(pointsAng) > 5:
-						medAng = statistics.median(pointsAng)
-						medDist = statistics.median(pointsDist)
-						x = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
-						y = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-						cv2.circle(backGround, (x, y), 5, (255, 0, 0), -1)
-					pointsAng = list()
-					pointsDist = list()
+					# Create Points
+					if abs(dist - lastDist < maxSize):
+						pointsAng.append(ang)
+						pointsDist.append(dist)
+					else:
+						#print(len(pointsAng))
+						if 100 > len(pointsAng) > 5:
+							medAng = statistics.median(pointsAng)
+							medDist = statistics.median(pointsDist)
+							x = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
+							y = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
+							if (x1 < x < x2) and (y1 < y < y3):
+								cv2.circle(backGround, (x, y), 5, (255, 0, 0), -1)
+						pointsAng = list()
+						pointsDist = list()
 				lastDist = dist
 
 		image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)

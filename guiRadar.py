@@ -30,8 +30,8 @@ def readConfig(settingsFile):
 				"maxDist": 4000,
 				"minAng": -90,
 				"maxAng": 90,
-				"touchWidth": 8000,
-				"touchHeight": 4000,
+				"touchWidth": 4000,
+				"touchHeight": 2250,
 				"widthOffset": 0,
 				"heightOffset": 0,
 				"angleOffset": 0,
@@ -203,7 +203,6 @@ def animate_radar(stopEvent):
 				x = int((item/dist2PX * math.cos((ang[i]+90) * math.pi/180))+midPointX)
 				y = int((item/dist2PX * math.sin((ang[i]+90) * math.pi/180))+midPointY)
 				lineArray.append((x, y))
-
 				image = cv2.line(backGround, lineArray[i], (x, y), red, 3)
 				i += 1
 		else:
@@ -211,8 +210,7 @@ def animate_radar(stopEvent):
 			i = 0
 			pointsAng = list()
 			pointsDist = list()
-			lastAng = 0
-			lastDist = 0
+			points = list()
 			for ang in scan:
 				dist = scan[ang]
 				if dist > maxDist:
@@ -224,24 +222,42 @@ def animate_radar(stopEvent):
 					lineArray.append((x, y))
 					image = cv2.line(backGround, lineArray[i], (x, y), red, 2)
 					i += 1
-					# Create Points
-					if abs(dist - lastDist < maxSize):
-						pointsAng.append(ang)
-						pointsDist.append(dist)
-					else:
-						#print(len(pointsAng))
-						if 100 > len(pointsAng) > 5:
-							medAng = statistics.median(pointsAng)
-							medDist = statistics.median(pointsDist)
-							x = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
-							y = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-							if (x1 < x < x2) and (y1 < y < y3):
-								cv2.circle(backGround, (x, y), 5, (255, 0, 0), -1)
-						pointsAng = list()
-						pointsDist = list()
+
+					if (x1 < x < x3) and (y1 < y < y3):
+						print(f"{x1}, {y1} - {x3}, {y3}")
+						# Create Points
+						if abs(dist - lastDist) < maxSize:
+							#print(f"{dist} - {lastDist} < {maxSize}")
+							pointsAng.append(ang)
+							pointsDist.append(dist)
+							points.append((x, y))
+							cv2.circle(backGround, (x, y), 4, (100, 255, 0), -1)
+						else:
+							#print(len(pointsAng))
+							if len(points) > 2:
+								xx1 = points[0][0]
+								xx2 = points[-1][0]
+								yy1 = points[0][1]
+								yy2 = points[-1][1]
+								#cv2.line(backGround, points[0], points[-1], (255,255,255), 3)
+								distOfExtremes = math.sqrt(((xx2-xx1)*(xx2-xx1))+((yy2-yy1)*(yy2-yy1)))
+								if minSize < distOfExtremes < maxSize:
+									#print(f"{points[0][0]} - {points[-1][0]}")
+									medAng = statistics.median(pointsAng)
+									medDist = statistics.median(pointsDist)
+									xs = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
+									ys = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
+									curX = int(((xs-x1)/(x2-x1))*100)/100
+									curY = int(((ys-y1)/(y3-y1))*100)/100
+									cv2.circle(backGround, (xs, ys), 5, (255, 0, 0), -1)
+									cv2.putText(backGround, f"{curX}-{curY}", (xs+10, ys+10), font, 0.5, color, thickness, cv2.LINE_AA)
+							pointsAng = list()
+							pointsDist = list()
+							points = list()
+
 				lastDist = dist
 
-		image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
+			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
 		# Displaying the image
 		#image = cv2.line(backGround,(600,600), (300, 300), red, thickness)
 
@@ -425,7 +441,7 @@ tk.Spinbox(frame1, textvariable=angleOffset_text, font=("Arial", 12), from_=-360
 
 ttk.Label(frame1, text='Min Detectable Size', font=("Arial", 12)).pack()
 minSize_text = tk.StringVar(value=minSize)
-tk.Spinbox(frame1, textvariable=minSize_text, font=("Arial", 12), from_=10, to=1000, increment=10).pack()
+tk.Spinbox(frame1, textvariable=minSize_text, font=("Arial", 12), from_=0, to=1000, increment=10).pack()
 
 ttk.Label(frame1, text='Max Detectable Size', font=("Arial", 12)).pack()
 maxSize_text = tk.StringVar(value=maxSize)

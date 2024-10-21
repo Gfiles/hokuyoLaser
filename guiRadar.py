@@ -181,7 +181,13 @@ def animate_radar(stopEvent):
 		image = cv2.line(backGround, (x2, y2), (x3, y3), green, 3)
 		image = cv2.line(backGround, (x3, y3), (x4, y4), green, 3)
 		image = cv2.line(backGround, (x4, y4), (x1, y1), green, 3)
-		
+
+		xList = [x1, x2, x3, x4]
+		yList = [y1, y2, y3, y4]
+		minX = min(xList)
+		maxX = max(xList)
+		minY = min(yList)
+		maxY = max(yList)
 		# end Square Draw
 
 		ang = []
@@ -221,17 +227,17 @@ def animate_radar(stopEvent):
 					y = int((dist/dist2PX * math.sin((ang+90) * math.pi/180))+midPointY)
 					lineArray.append((x, y))
 					image = cv2.line(backGround, lineArray[i], (x, y), red, 2)
-					i += 1
-
-					if (x1 < x < x3) and (y1 < y < y3):
-						print(f"{x1}, {y1} - {x3}, {y3}")
-						# Create Points
+					
+					if (minX < x < maxX) and (minY < y < maxY):
+						#print(f"{x1}, {y1} - {x3}, {y3}")
+						# Points in the rectangele
+						cv2.line(backGround, lineArray[i], (x, y), (100, 255, 0), 4)
 						if abs(dist - lastDist) < maxSize:
 							#print(f"{dist} - {lastDist} < {maxSize}")
 							pointsAng.append(ang)
 							pointsDist.append(dist)
 							points.append((x, y))
-							cv2.circle(backGround, (x, y), 4, (100, 255, 0), -1)
+							#cv2.circle(backGround, (x, y), 4, (100, 255, 0), -1)
 						else:
 							#print(len(pointsAng))
 							if len(points) > 2:
@@ -254,7 +260,7 @@ def animate_radar(stopEvent):
 							pointsAng = list()
 							pointsDist = list()
 							points = list()
-
+					i += 1
 				lastDist = dist
 
 			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)

@@ -181,19 +181,23 @@ def animate_radar(stopEvent):
 		image = cv2.line(backGround, (x2, y2), (x3, y3), green, 3)
 		image = cv2.line(backGround, (x3, y3), (x4, y4), green, 3)
 		image = cv2.line(backGround, (x4, y4), (x1, y1), green, 3)
-
-		xList = [x1, x2, x3, x4]
-		yList = [y1, y2, y3, y4]
-		minX = min(xList)
-		maxX = max(xList)
-		minY = min(yList)
-		maxY = max(yList)
 		# end Square Draw
-
+  
+		if debug:
+			#Draw Data window
+			dataWidth = int(touchWidth/dist2PX)
+			dataHeight = int(touchHeight/dist2PX)
+			image = cv2.line(backGround, (0, 0), (dataWidth, 0), yellow, 3)
+			image = cv2.line(backGround, (dataWidth, 0), (dataWidth, dataHeight), yellow, 3)
+			image = cv2.line(backGround, (dataWidth, dataHeight), (0, dataHeight), yellow, 3)
+			image = cv2.line(backGround, (0, dataHeight), (0, 0), yellow, 3)
+  
 		ang = []
 		dist = []
 		lastDist = 1000
 		lineArray = [(midPointX, midPointY)]
+		lineYellow = [(int(touchWidth/dist2PX), 0)]
+		touchPoints = list()
 		if not laserOn:
 			for i in range(minAng, maxAng):
 				ang.append(i)
@@ -222,14 +226,28 @@ def animate_radar(stopEvent):
 				if dist > maxDist:
 					dist = maxDist
 				if minDist < dist <= maxDist and minAng < ang < maxAng:
-					radAng = ang * math.pi/180
-					x = int((dist/dist2PX * math.cos((ang+90) * math.pi/180))+midPointX)
-					y = int((dist/dist2PX * math.sin((ang+90) * math.pi/180))+midPointY)
-					lineArray.append((x, y))
-					image = cv2.line(backGround, lineArray[i], (x, y), red, 2)
-					
-					if (minX < x < maxX) and (minY < y < maxY):
-						#print(f"{x1}, {y1} - {x3}, {y3}")
+					#Draw radar
+					#radAng = ang * math.pi/180
+					xRed = int((dist/dist2PX * math.cos((ang+90) * math.pi/180))+midPointX)
+					yRed = int((dist/dist2PX * math.sin((ang+90) * math.pi/180))+midPointY)
+					lineArray.append((xRed, yRed))
+					image = cv2.line(backGround, lineArray[i], (xRed, yRed), red, 2)
+
+					x = (dist * math.cos((ang-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+					xData = int(x/dist2PX)
+					y = (dist * math.sin((ang-angleOffset+90) * math.pi/180))-heightOffset
+					yData = int(y/dist2PX)
+					lineYellow.append((xData, yData))
+					if (0 < x < touchWidth) and (0 < y < touchHeight):
+						touchPoints.append((x, y))
+						if debug:
+							image = cv2.line(backGround, lineYellow[i], (xData, yData), yellow, 2)
+					i += 1
+			zones = list()
+			for point in touchPoints:
+				#print(point)
+				cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
+				"""
 						# Points in the rectangele
 						cv2.line(backGround, lineArray[i], (x, y), (100, 255, 0), 4)
 						if abs(dist - lastDist) < maxSize:
@@ -260,7 +278,7 @@ def animate_radar(stopEvent):
 							pointsAng = list()
 							pointsDist = list()
 							points = list()
-					i += 1
+				"""
 				lastDist = dist
 
 			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
@@ -355,7 +373,7 @@ screenWidth = tkWindow.winfo_screenwidth()
 screenHeight = tkWindow.winfo_screenheight()
 windowWidth = 300
 windowHeight = 700
-canvasSizeX = screenWidth - windowWidth
+canvasSizeX = screenWidth - windowWidth - 20
 canvasSizeY = int(canvasSizeX/2+20)
 showMeters = True
 showAngles = True
@@ -367,6 +385,7 @@ stopThread = False
 color = (255, 255, 255)
 red = (0, 0, 255)
 green = (0, 255, 0)
+yellow = (0, 255, 255)
 
 # Line thickness of -1 px
 thickness = 1

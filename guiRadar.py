@@ -239,15 +239,73 @@ def animate_radar(stopEvent):
 					yData = int(y/dist2PX)
 					lineYellow.append((xData, yData))
 					if (0 < x < touchWidth) and (0 < y < touchHeight):
+						#print(f"{int(x)},{int(y)}")
 						touchPoints.append((x, y))
 						if debug:
 							image = cv2.line(backGround, lineYellow[i], (xData, yData), yellow, 2)
 					i += 1
+			#exit()
+			points = list()
+			lastPoint = (0, 0)
 			zones = list()
+			newZone = False
+			zIndex = 0
 			for point in touchPoints:
 				#print(point)
-				cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
-				"""
+				if debug:
+					#cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
+					pass
+				distance = math.sqrt(((point[0]-lastPoint[0])*(point[0]-lastPoint[0]))+((point[1]-lastPoint[1])*(point[1]-lastPoint[1])))
+				#print(distance)
+				lastPoint = point
+				if distance < minSize:
+					#print(point)
+					cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
+					#pointsX.append(point[0])
+					#pointsY.append(point[1])
+					points.append((int(point[0]), int(point[1])))
+					newZone = True
+				else:
+					if newZone:
+						zones.append(points)
+						newZone = False
+						points = list()
+					#print(pointsX)
+					#print("Mediam")
+     
+			for zone in zones:
+				print(zone)
+				print("-----")
+				if len(zone) > 2:
+					#print("-----")
+					#print(pointsX)
+					xx1 = zone[0][0]
+					xx2 = zone[-1][0]
+					yy1 = zone[0][-1]
+					yy2 = zone[-1][-1]
+					print(f"{zone[0], zone[-1]}")
+					cv2.line(backGround, zone[0], zone[-1], (255,255,255), 3)
+					distOfExtremes = math.sqrt(((xx2-xx1)*(xx2-xx1))+((yy2-yy1)*(yy2-yy1)))
+					if minSize < distOfExtremes < maxSize:
+
+						medX = (xx2+xx1)/2
+						medY = (yy2+yy1)/2
+						#print(f"{pointsX[0]} - {pointsX[-1]}")
+						#print(f"Mediam {medX}, {medY}, Dist Extremes = {distOfExtremes}")
+						#print("-----")
+						cv2.circle(backGround, (int(medX/dist2PX), int(medY/dist2PX)), 5, (255, 0, 0), -1)
+					
+			print(f"number of Zones {zIndex} -> {len(zones)}")
+			#print(zones[0])
+			"""
+									medDist = statistics.median(pointsDist)
+									xs = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
+									ys = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
+									curX = int(((xs-x1)/(x2-x1))*100)/100
+									curY = int(((ys-y1)/(y3-y1))*100)/100
+									cv2.circle(backGround, (xs, ys), 5, (255, 0, 0), -1)
+			"""
+			"""
 						# Points in the rectangele
 						cv2.line(backGround, lineArray[i], (x, y), (100, 255, 0), 4)
 						if abs(dist - lastDist) < maxSize:
@@ -278,8 +336,7 @@ def animate_radar(stopEvent):
 							pointsAng = list()
 							pointsDist = list()
 							points = list()
-				"""
-				lastDist = dist
+			"""
 
 			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
 		# Displaying the image

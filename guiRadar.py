@@ -218,8 +218,6 @@ def animate_radar(stopEvent):
 		else:
 			scan = laser.get_single_scan()
 			i = 0
-			pointsAng = list()
-			pointsDist = list()
 			points = list()
 			for ang in scan:
 				dist = scan[ang]
@@ -274,8 +272,8 @@ def animate_radar(stopEvent):
 					#print("Mediam")
      
 			for zone in zones:
-				print(zone)
-				print("-----")
+				#print(zone)
+				#print("-----")
 				if len(zone) > 2:
 					#print("-----")
 					#print(pointsX)
@@ -283,60 +281,32 @@ def animate_radar(stopEvent):
 					xx2 = zone[-1][0]
 					yy1 = zone[0][-1]
 					yy2 = zone[-1][-1]
-					print(f"{zone[0], zone[-1]}")
-					cv2.line(backGround, zone[0], zone[-1], (255,255,255), 3)
+					#print(f"{zone[0], zone[-1]}")
+					#cv2.line(backGround, zone[0], zone[-1], (255,255,255), 3)
 					distOfExtremes = math.sqrt(((xx2-xx1)*(xx2-xx1))+((yy2-yy1)*(yy2-yy1)))
 					if minSize < distOfExtremes < maxSize:
-
 						medX = (xx2+xx1)/2
 						medY = (yy2+yy1)/2
-						#print(f"{pointsX[0]} - {pointsX[-1]}")
-						#print(f"Mediam {medX}, {medY}, Dist Extremes = {distOfExtremes}")
-						#print("-----")
-						cv2.circle(backGround, (int(medX/dist2PX), int(medY/dist2PX)), 5, (255, 0, 0), -1)
-					
-			print(f"number of Zones {zIndex} -> {len(zones)}")
-			#print(zones[0])
-			"""
-									medDist = statistics.median(pointsDist)
-									xs = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
-									ys = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-									curX = int(((xs-x1)/(x2-x1))*100)/100
-									curY = int(((ys-y1)/(y3-y1))*100)/100
-									cv2.circle(backGround, (xs, ys), 5, (255, 0, 0), -1)
-			"""
-			"""
-						# Points in the rectangele
-						cv2.line(backGround, lineArray[i], (x, y), (100, 255, 0), 4)
-						if abs(dist - lastDist) < maxSize:
-							#print(f"{dist} - {lastDist} < {maxSize}")
-							pointsAng.append(ang)
-							pointsDist.append(dist)
-							points.append((x, y))
-							#cv2.circle(backGround, (x, y), 4, (100, 255, 0), -1)
-						else:
-							#print(len(pointsAng))
-							if len(points) > 2:
-								xx1 = points[0][0]
-								xx2 = points[-1][0]
-								yy1 = points[0][1]
-								yy2 = points[-1][1]
-								#cv2.line(backGround, points[0], points[-1], (255,255,255), 3)
-								distOfExtremes = math.sqrt(((xx2-xx1)*(xx2-xx1))+((yy2-yy1)*(yy2-yy1)))
-								if minSize < distOfExtremes < maxSize:
-									#print(f"{points[0][0]} - {points[-1][0]}")
-									medAng = statistics.median(pointsAng)
-									medDist = statistics.median(pointsDist)
-									xs = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
-									ys = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-									curX = int(((xs-x1)/(x2-x1))*100)/100
-									curY = int(((ys-y1)/(y3-y1))*100)/100
-									cv2.circle(backGround, (xs, ys), 5, (255, 0, 0), -1)
-									cv2.putText(backGround, f"{curX}-{curY}", (xs+10, ys+10), font, 0.5, color, thickness, cv2.LINE_AA)
-							pointsAng = list()
-							pointsDist = list()
-							points = list()
-			"""
+						if debug:
+							#Point to send to Services
+							cv2.circle(backGround, (int(medX/dist2PX), int(medY/dist2PX)), 5, (255, 0, 0), -1)
+		
+							curX = int(((medX)/(touchWidth))*100)/100
+							curY = int(((medY)/(touchHeight))*100)/100
+							cv2.putText(backGround, f"{curX}-{curY}", (int(medX/dist2PX)+10, int(medY/dist2PX)+10), font, 0.5, color, thickness, cv2.LINE_AA)
+						#Show mediam point
+						#x = (dist * math.cos((ang-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+						#y = (dist * math.sin((ang-angleOffset+90) * math.pi/180))-heightOffset
+						#medX = medX-(touchWidth/2)-widthOffset
+						#medY = medY+heightOffset
+						radarX = ((medX+(touchWidth/2)-widthOffset+midPointX-20)/dist2PX)
+						radarY = ((medY+heightOffset+midPointY)/dist2PX)
+						if medX == 0:
+							medDist = math.sqrt((medX*medX)+(medY*medY))
+							medAng = math.atan(medY/medX)
+							radarX = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
+							radarY = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
+						cv2.circle(backGround, (int(radarX), int(radarY)), 5, (255, 255, 0), -1)
 
 			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
 		# Displaying the image

@@ -16,7 +16,48 @@ import serial.tools.list_ports
 from hokuyo.driver import hokuyo
 from hokuyo.tools import serial_port
 
+# ---------- Classes ------------
+class Point:
+    def __init__(self, angle, distance) -> None:
+        self.angle = angle
+        self.distance = distance
+
+    def __str__(self):
+        return f"{self.angle} Deg - {self.distance} mm"
+    
+    def x(self):
+        return (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+
+    def xy(self):
+        return (((self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset), ((self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset))
+
+    def y(self):
+        return (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
+
+    def xRadar(self):
+        return int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX)
+
+    def yRadar(self):
+        return int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY)
+
+    def xyRadar(self):
+        return (int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX), int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY))
+
+    def xyData(self):
+        x = (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+        y = (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
+        return (int(x/dist2PX), int(y/dist2PX))
+
 # ---------- Functions ----------
+def distBetweenPoints(x1, y1, x2, y2):
+	return math.sqrt(((x2-x1)**2)+((y2-y1)**2))
+
+def getDist(x, y):
+    return math.sqrt(x**2+y**2)
+
+def getAngle(x, y):
+	return math.atan(x/y)+((angleOffset+90)*math.pi/180)
+
 def readConfig(settingsFile):
 	if os.path.isfile(settingsFile):
 		with open(settingsFile) as json_file:
@@ -98,6 +139,13 @@ def saveJson():
     print("Saved")
 
 def animate_radar(stopEvent):
+	global dist2PX
+	global angleOffset
+	global touchWidth
+	global widthOffset
+	global heightOffset
+	global midPointX
+	global midPointY
 	while not stopEvent.is_set():
 		minDist = int(radarMinDist_text.get())
 		maxDist = int(radarMaxDist_text.get())
@@ -149,28 +197,30 @@ def animate_radar(stopEvent):
 		x4 = x1
 		y4 = y3
 		
-		dist1 = math.sqrt(x1**2+(y1)**2)
+		dist1 = getDist(x1, y1)
 		if y1 == 0:
 			y1 = 1
 		ang1 = math.atan(x1/y1)+((angleOffset+90)*math.pi/180)
 		x1 = int(dist1/dist2PX * math.cos((ang1)))+midPointX
 		y1 = int(dist1/dist2PX * math.sin((ang1)))+midPointY
 
-		dist2 = math.sqrt(x2**2+(y2)**2)
+		dist2 = getDist(x2, y2)
 		if y2 == 0:
 			y2 = 1
 		ang2 = math.atan(x2/y2)+((angleOffset+90)*math.pi/180)
 		x2 = int(dist2/dist2PX * math.cos((ang2)))+midPointX
 		y2 = int(dist2/dist2PX * math.sin((ang2)))+midPointY
 		
-		dist3 = math.sqrt(x3**2+(y3)**2)
+		dist3 = getDist(x3, y3)
+		#print(f"{dist3} - {math.sqrt(x3**2+y3**2)}")
 		if y3 == 0:
 			y3 = 1
 		ang3 = math.atan(x3/y3)+((angleOffset+90)*math.pi/180)
 		x3 = int(dist3/dist2PX * math.cos((ang3)))+midPointX
 		y3 = int(dist3/dist2PX * math.sin((ang3)))+midPointY
 
-		dist4 = math.sqrt(x4**2+(y4)**2)
+		dist4 = getDist(x4, y4)
+		#print(f"{dist4} - {math.dist([x4], [y4])}, {x4}, {y4}")
 		if y4 == 0:
 			y4 = 1
 		ang4 = math.atan(x4/y4)+((angleOffset+90)*math.pi/180)
@@ -195,8 +245,6 @@ def animate_radar(stopEvent):
 		ang = []
 		dist = []
 		lastDist = 1000
-		lineArray = [(midPointX, midPointY)]
-		lineYellow = [(int(touchWidth/dist2PX), 0)]
 		touchPoints = list()
 		if not laserOn:
 			for i in range(minAng, maxAng):
@@ -217,100 +265,74 @@ def animate_radar(stopEvent):
 				i += 1
 		else:
 			scan = laser.get_single_scan()
-			i = 0
-			points = list()
+			#Create array for radar points
+			radarPoints = list()
+			radarPoints.append(Point(0, 0))
 			for ang in scan:
 				dist = scan[ang]
 				if dist > maxDist:
 					dist = maxDist
 				if minDist < dist <= maxDist and minAng < ang < maxAng:
+					radarPoints.append(Point(ang, dist))
 					#Draw radar
-					#radAng = ang * math.pi/180
-					xRed = int((dist/dist2PX * math.cos((ang+90) * math.pi/180))+midPointX)
-					yRed = int((dist/dist2PX * math.sin((ang+90) * math.pi/180))+midPointY)
-					lineArray.append((xRed, yRed))
-					image = cv2.line(backGround, lineArray[i], (xRed, yRed), red, 2)
-
-					x = (dist * math.cos((ang-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
-					xData = int(x/dist2PX)
-					y = (dist * math.sin((ang-angleOffset+90) * math.pi/180))-heightOffset
-					yData = int(y/dist2PX)
-					lineYellow.append((xData, yData))
-					if (0 < x < touchWidth) and (0 < y < touchHeight):
+					image = cv2.line(backGround, radarPoints[-2].xyRadar(), radarPoints[-1].xyRadar(), red, 2)
+					#Get Points in TouchArea
+					if (0 < radarPoints[-1].x() < touchWidth) and (0 < radarPoints[-1].y() < touchHeight):
 						#print(f"{int(x)},{int(y)}")
-						touchPoints.append((x, y))
+						touchPoints.append(Point(ang, dist))
 						if debug:
-							image = cv2.line(backGround, lineYellow[i], (xData, yData), yellow, 2)
-					i += 1
-			#exit()
+							image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
+			#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
 			points = list()
-			lastPoint = (0, 0)
+			lastPoint = Point(0, 0)
 			zones = list()
 			newZone = False
-			zIndex = 0
 			for point in touchPoints:
-				#print(point)
-				if debug:
-					#cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
-					pass
-				distance = math.sqrt(((point[0]-lastPoint[0])*(point[0]-lastPoint[0]))+((point[1]-lastPoint[1])*(point[1]-lastPoint[1])))
-				#print(distance)
+				distance = distBetweenPoints(point.x(), point.y(), lastPoint.x(), lastPoint.y())
 				lastPoint = point
 				if distance < minSize:
-					#print(point)
-					cv2.circle(backGround, (int(point[0]/dist2PX), int(point[1]/dist2PX)), 4, (100, 255, 0), -1)
-					#pointsX.append(point[0])
-					#pointsY.append(point[1])
-					points.append((int(point[0]), int(point[1])))
+					if debug:
+						cv2.circle(backGround, point.xyData(), 4, (100, 255, 0), -1)
+					points.append(point)
 					newZone = True
 				else:
 					if newZone:
 						zones.append(points)
 						newZone = False
 						points = list()
-					#print(pointsX)
-					#print("Mediam")
-     
+			# iterate over all Zones to get the mediam point which will be converted to Touch Points			
 			for zone in zones:
-				#print(zone)
-				#print("-----")
 				if len(zone) > 2:
-					#print("-----")
-					#print(pointsX)
-					xx1 = zone[0][0]
-					xx2 = zone[-1][0]
-					yy1 = zone[0][-1]
-					yy2 = zone[-1][-1]
-					#print(f"{zone[0], zone[-1]}")
-					#cv2.line(backGround, zone[0], zone[-1], (255,255,255), 3)
-					distOfExtremes = math.sqrt(((xx2-xx1)*(xx2-xx1))+((yy2-yy1)*(yy2-yy1)))
+					xx1 = zone[0].x()
+					xx2 = zone[-1].x()
+					yy1 = zone[0].y()
+					yy2 = zone[-1].y()
+					#Get distance of the extremes to test if the zones are useble
+					distOfExtremes = distBetweenPoints(xx1, yy1, xx2, yy2)
 					if minSize < distOfExtremes < maxSize:
 						medX = (xx2+xx1)/2
 						medY = (yy2+yy1)/2
+						medAng = (zone[0].angle + zone[-1].angle)/2
+						medDist = (zone[0].distance + zone[-1].distance)/2
 						if debug:
 							#Point to send to Services
 							cv2.circle(backGround, (int(medX/dist2PX), int(medY/dist2PX)), 5, (255, 0, 0), -1)
-		
 							curX = int(((medX)/(touchWidth))*100)/100
 							curY = int(((medY)/(touchHeight))*100)/100
 							cv2.putText(backGround, f"{curX}-{curY}", (int(medX/dist2PX)+10, int(medY/dist2PX)+10), font, 0.5, color, thickness, cv2.LINE_AA)
-						#Show mediam point
-						#x = (dist * math.cos((ang-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
-						#y = (dist * math.sin((ang-angleOffset+90) * math.pi/180))-heightOffset
-						#medX = medX-(touchWidth/2)-widthOffset
-						#medY = medY+heightOffset
-						radarX = ((medX+(touchWidth/2)-widthOffset+midPointX-20)/dist2PX)
-						radarY = ((medY+heightOffset+midPointY)/dist2PX)
+						#Create mediam point
+						radarPoint = Point(medAng, medDist).xyRadar()
+						"""
 						if medX == 0:
 							medDist = math.sqrt((medX*medX)+(medY*medY))
 							medAng = math.atan(medY/medX)
 							radarX = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
 							radarY = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-						cv2.circle(backGround, (int(radarX), int(radarY)), 5, (255, 255, 0), -1)
+						"""
+						cv2.circle(backGround, radarPoint, 5, (255, 255, 0), -1)
 
-			image = cv2.line(backGround, lineArray[i], lineArray[0], red, thickness)
+			image = cv2.line(backGround, radarPoints[-1].xyRadar(), radarPoints[0].xyRadar(), red, thickness)
 		# Displaying the image
-		#image = cv2.line(backGround,(600,600), (300, 300), red, thickness)
 
 		cv2.imshow(window_name, image)
 		sleep(time2Scan)
@@ -350,7 +372,6 @@ sendSpeed = config["sendSpeed"]
 minSize = config["minSize"]
 maxSize = config["maxSize"]
 debug = config["debug"]
-#print(debug)
 
 # Get COM Ports
 comlist = serial.tools.list_ports.comports()
@@ -368,7 +389,6 @@ if len(comlist) > 0:
 				break
 		if not jsonPort:
 			uartPort = comPortList[0]
-	#print(uartPort)
 
 # Laser Settings
 laser_serial = serial.Serial(port=uartPort, baudrate=uartSpeed, timeout=0.5)
@@ -407,6 +427,7 @@ showAngles = True
 midPointX = int(canvasSizeX/2)
 midPointY = 20
 stopThread = False
+dist2PX = maxDist/midPointX
 
 # color in BGR
 color = (255, 255, 255)

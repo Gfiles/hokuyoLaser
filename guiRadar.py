@@ -1,5 +1,4 @@
 import cv2
-import statistics
 import numpy as np
 from time import sleep
 import math
@@ -82,7 +81,7 @@ def readConfig(settingsFile):
 				"minSize": 20,
 				"maxSize": 300,
 				"oscPort": 9000,
-				"oscServer": "172.25.202.34"
+				"oscServer": "127.0.0.1"
 		}
 		# Serializing json
 		json_object = json.dumps(data, indent=4)
@@ -130,6 +129,9 @@ def saveJson():
     config["angleOffset"] = int(angleOffset_text.get())
     config["minSize"] = int(minSize_text.get())
     config["maxSize"] = int(maxSize_text.get())
+    config["oscPort"] = oscPort_text.get()
+    config["oscServer"] = oscServer_text.get()
+    config["debug"] = bool(debug_text.get())
     
     # Serializing json
     json_object = json.dumps(config, indent=4)
@@ -146,6 +148,8 @@ def animate_radar(stopEvent):
 	global heightOffset
 	global midPointX
 	global midPointY
+	global debug
+	
 	while not stopEvent.is_set():
 		minDist = int(radarMinDist_text.get())
 		maxDist = int(radarMaxDist_text.get())
@@ -158,7 +162,9 @@ def animate_radar(stopEvent):
 		angleOffset = int(angleOffset_text.get())
 		minSize = int(minSize_text.get())
 		maxSize = int(maxSize_text.get())
-  		
+		debug = bool(debug_text.get())
+		print(f"{debug} - {oscPort}")
+	
 		if maxDist < 1000:
 			maxDist = 1000
 		
@@ -371,6 +377,8 @@ time2Scan = config["time2Scan"]
 sendSpeed = config["sendSpeed"]
 minSize = config["minSize"]
 maxSize = config["maxSize"]
+oscPort = config["oscPort"]
+oscServer = config["oscServer"]
 debug = config["debug"]
 
 # Get COM Ports
@@ -415,10 +423,18 @@ tkWindow = tk.Tk()
 tkWindow.protocol("WM_DELETE_WINDOW", on_closing)
 
 tkWindow.title("Radar Detection")
+tabControl = ttk.Notebook(tkWindow)
+tab1 = ttk.Frame(tabControl)
+tab2 = ttk.Frame(tabControl)
+
+tabControl.add(tab1, text ='Radar Settings') 
+tabControl.add(tab2, text ='Output Settings')
+tabControl.pack(expand = 1, fill ="both")
+
 # get the screen dimension
 screenWidth = tkWindow.winfo_screenwidth()
 screenHeight = tkWindow.winfo_screenheight()
-windowWidth = 300
+windowWidth = 250
 windowHeight = 700
 canvasSizeX = screenWidth - windowWidth - 20
 canvasSizeY = int(canvasSizeX/2+20)
@@ -447,82 +463,107 @@ center_y = 0
 
 tkWindow.geometry(f'{windowWidth}x{windowHeight}+{center_x}+{center_y}')
 
-frame1 = ttk.Frame(tkWindow)
+frame1 = ttk.Frame(tab1)
 frame1['padding'] = 10
 
-ttk.Label(frame1, text='Radar settings', font=("Arial", 12)).pack()
-ttk.Label(frame1, text='COM Port', font=("Arial", 12)).pack()
+#ttk.Label(frame1, text='Radar settings', font=("Arial", 11)).pack()
+ttk.Label(frame1, text='COM Port', font=("Arial", 11)).pack()
 uartPort_text = tk.StringVar()
 if len(comPortList) == 0:
 	uartPort_text.set("None")
 else:
 	uartPort_text.set(uartPort)
 if len(comPortList) < 2:
-	uartEntry = ttk.Entry(frame1, textvariable=uartPort_text, font=("Arial", 12))
+	uartEntry = ttk.Entry(frame1, textvariable=uartPort_text, font=("Arial", 11))
 	uartEntry["state"] = "readonly"
 	uartEntry.pack()
 else:
-	comboComPort = ttk.Combobox(frame1, textvariable=uartPort_text, font=("Arial", 12))
+	comboComPort = ttk.Combobox(frame1, textvariable=uartPort_text, font=("Arial", 11))
 	comboComPort["values"] = comPortList
 	comboComPort["state"] = 'readonly'
 	comboComPort.pack()
 
-ttk.Label(frame1, text='Port Speed', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Port Speed', font=("Arial", 11)).pack()
 uartSpeed_text = tk.StringVar(value=uartSpeed)
-comboSpeed = ttk.Combobox(frame1, textvariable=uartSpeed_text, font=("Arial", 12))
+comboSpeed = ttk.Combobox(frame1, textvariable=uartSpeed_text, font=("Arial", 11))
 comboSpeed["values"] = ["19200", "115200", "256000"]
 comboSpeed["state"] = 'readonly'
 comboSpeed.pack()
 
-ttk.Label(frame1, text='Radar Min Distance (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Radar Min Distance (mm)', font=("Arial", 11)).pack()
 radarMinDist_text = tk.StringVar(value=minDist)
-tk.Spinbox(frame1, textvariable=radarMinDist_text, font=("Arial", 12), from_=20, to=7000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=radarMinDist_text, font=("Arial", 11), from_=20, to=7000, increment=100).pack()
 
-ttk.Label(frame1, text='Radar Max Distance (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Radar Max Distance (mm)', font=("Arial", 11)).pack()
 radarMaxDist_text = tk.StringVar(value=maxDist)
-tk.Spinbox(frame1, textvariable=radarMaxDist_text, font=("Arial", 12), from_=1000, to=7000, increment=1000).pack()
+tk.Spinbox(frame1, textvariable=radarMaxDist_text, font=("Arial", 11), from_=1000, to=7000, increment=1000).pack()
 
-ttk.Label(frame1, text='Radar Min Angle', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Radar Min Angle', font=("Arial", 11)).pack()
 radarMinAng_text = tk.StringVar(value=minAng)
-tk.Spinbox(frame1, textvariable=radarMinAng_text, font=("Arial", 12), from_=-360, to=360, increment=10).pack()
+tk.Spinbox(frame1, textvariable=radarMinAng_text, font=("Arial", 11), from_=-360, to=360, increment=10).pack()
 
-ttk.Label(frame1, text='Radar Max Angle', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Radar Max Angle', font=("Arial", 11)).pack()
 radarMaxAng_text = tk.StringVar(value=maxAng)
-tk.Spinbox(frame1, textvariable=radarMaxAng_text, font=("Arial", 12), from_=-360, to=360, increment=10).pack()
+tk.Spinbox(frame1, textvariable=radarMaxAng_text, font=("Arial", 11), from_=-360, to=360, increment=10).pack()
 
 
-ttk.Label(frame1, text='Touch Area settings', font=("Arial", 12)).pack()
-ttk.Label(frame1, text='Width (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Touch Area settings', font=("Arial", 14)).pack()
+ttk.Label(frame1, text='Width (mm)', font=("Arial", 11)).pack()
 touchWidth_text = tk.StringVar(value=touchWidth)
-tk.Spinbox(frame1, textvariable=touchWidth_text, font=("Arial", 12), from_=0, to=14000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=touchWidth_text, font=("Arial", 11), from_=0, to=14000, increment=100).pack()
 
-ttk.Label(frame1, text='Height (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Height (mm)', font=("Arial", 11)).pack()
 touchHeight_text = tk.StringVar(value=touchHeight)
-tk.Spinbox(frame1, textvariable=touchHeight_text, font=("Arial", 12), from_=0, to=7000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=touchHeight_text, font=("Arial", 11), from_=0, to=7000, increment=100).pack()
 
-ttk.Label(frame1, text='Width Offset (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Width Offset (mm)', font=("Arial", 11)).pack()
 widthOffset_text = tk.StringVar(value=widthOffset)
-tk.Spinbox(frame1, textvariable=widthOffset_text, font=("Arial", 12), from_=-7000, to=7000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=widthOffset_text, font=("Arial", 11), from_=-7000, to=7000, increment=100).pack()
 
-ttk.Label(frame1, text='Height Offset (mm)', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Height Offset (mm)', font=("Arial", 11)).pack()
 heightOffset_text = tk.StringVar(value=heightOffset)
-tk.Spinbox(frame1, textvariable=heightOffset_text, font=("Arial", 12), from_=0, to=7000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=heightOffset_text, font=("Arial", 11), from_=0, to=7000, increment=100).pack()
 
-ttk.Label(frame1, text='Angle Offset', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Angle Offset', font=("Arial", 11)).pack()
 angleOffset_text = tk.StringVar(value=angleOffset)
-tk.Spinbox(frame1, textvariable=angleOffset_text, font=("Arial", 12), from_=-360, to=360).pack()
+tk.Spinbox(frame1, textvariable=angleOffset_text, font=("Arial", 11), from_=-360, to=360).pack()
 
-ttk.Label(frame1, text='Min Detectable Size', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Min Detectable Size', font=("Arial", 11)).pack()
 minSize_text = tk.StringVar(value=minSize)
-tk.Spinbox(frame1, textvariable=minSize_text, font=("Arial", 12), from_=0, to=1000, increment=10).pack()
+tk.Spinbox(frame1, textvariable=minSize_text, font=("Arial", 11), from_=0, to=1000, increment=10).pack()
 
-ttk.Label(frame1, text='Max Detectable Size', font=("Arial", 12)).pack()
+ttk.Label(frame1, text='Max Detectable Size', font=("Arial", 11)).pack()
 maxSize_text = tk.StringVar(value=maxSize)
-tk.Spinbox(frame1, textvariable=maxSize_text, font=("Arial", 12), from_=20, to=2000, increment=100).pack()
+tk.Spinbox(frame1, textvariable=maxSize_text, font=("Arial", 11), from_=20, to=2000, increment=100).pack()
 
-tk.Button(frame1, text="Save Settings", command = saveJson, font=("Arial", 14)).pack(pady=20)
+frame1.pack()
+# End Tab1
+# Start Tab2
+tab2["padding"] = 10
+ttk.Label(tab2, text='Debug', font=("Arial", 12)).pack()
+debug_text = tk.StringVar()
+if debug:
+	debug_text.set("true")
+else:
+    debug_text.set("false")
+debugEntry = ttk.Combobox(tab2, textvariable=debug_text, font=("Arial", 12))
+debugEntry["values"] = ["true", "false"]
+debugEntry["state"] = 'readonly'
+debugEntry.pack()
 
-frame1.pack(side = tk.LEFT)
+ttk.Label(tab2, text='OSC Server', font=("Arial", 12)).pack()
+oscServer_text = tk.StringVar(value=oscServer)
+oscServerEntry = ttk.Entry(tab2, textvariable=oscServer_text, font=("Arial", 12))
+oscServerEntry.pack()
+
+ttk.Label(tab2, text='OSC Port', font=("Arial", 12)).pack()
+oscPort_text = tk.StringVar(value=oscPort)
+oscPortEntry = ttk.Entry(tab2, textvariable=oscPort_text, font=("Arial", 12))
+oscPortEntry.pack()
+
+# End Tab2
+
+tk.Button(tkWindow, text="Save Settings", command = saveJson, font=("Arial", 14)).pack(pady=20)
 
 stopEvent = threading.Event()
 thread = threading.Thread(target=animate_radar, daemon=True, args=(stopEvent,))

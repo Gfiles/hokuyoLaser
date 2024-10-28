@@ -1,7 +1,7 @@
 {
     "uartPort": "COM4",
     "uartSpeed": 19200,
-    "debug": true,
+    "debug": false,
     "minDist": 200,
     "maxDist": 2000,
     "minAng": -90,
@@ -16,6 +16,6 @@
     "tcpPort": 65432,
     "minSize": 30,
     "maxSize": 820,
-    "oscPort": "9000",
+    "oscPort": "8000",
     "oscServer": "127.0.0.1"
 }

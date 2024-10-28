@@ -131,7 +131,7 @@ def saveJson():
     config["maxSize"] = int(maxSize_text.get())
     config["oscPort"] = oscPort_text.get()
     config["oscServer"] = oscServer_text.get()
-    config["debug"] = bool(debug_text.get())
+    config["debug"] = bool(debug_Check.get())
     
     # Serializing json
     json_object = json.dumps(config, indent=4)
@@ -149,7 +149,6 @@ def animate_radar(stopEvent):
 	global midPointX
 	global midPointY
 	global debug
-	
 	while not stopEvent.is_set():
 		minDist = int(radarMinDist_text.get())
 		maxDist = int(radarMaxDist_text.get())
@@ -162,9 +161,8 @@ def animate_radar(stopEvent):
 		angleOffset = int(angleOffset_text.get())
 		minSize = int(minSize_text.get())
 		maxSize = int(maxSize_text.get())
-		debug = bool(debug_text.get())
-		print(f"{debug} - {oscPort}")
-	
+		debug = bool(debug_Check.get())
+  		
 		if maxDist < 1000:
 			maxDist = 1000
 		
@@ -540,16 +538,13 @@ frame1.pack()
 # End Tab1
 # Start Tab2
 tab2["padding"] = 10
-ttk.Label(tab2, text='Debug', font=("Arial", 12)).pack()
-debug_text = tk.StringVar()
-if debug:
-	debug_text.set("true")
-else:
-    debug_text.set("false")
-debugEntry = ttk.Combobox(tab2, textvariable=debug_text, font=("Arial", 12))
-debugEntry["values"] = ["true", "false"]
-debugEntry["state"] = 'readonly'
-debugEntry.pack()
+
+debug_Check = tk.IntVar(value=debug)
+
+debugCheckButton = tk.Checkbutton(tab2,  text="Debug", font=("Arial", 12), variable=debug_Check,  onvalue=1, offvalue=0)
+#debugEntry["values"] = ["true", "false"]
+#debugEntry["state"] = 'readonly'
+debugCheckButton.pack()
 
 ttk.Label(tab2, text='OSC Server', font=("Arial", 12)).pack()
 oscServer_text = tk.StringVar(value=oscServer)

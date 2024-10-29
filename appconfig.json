@@ -17,5 +17,6 @@
     "minSize": 30,
     "maxSize": 820,
     "oscPort": "8000",
-    "oscServer": "127.0.0.1"
+    "oscServer": "127.0.0.1",
+    "oscAddress": "/cursorLeft"
 }

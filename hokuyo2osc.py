@@ -1,7 +1,6 @@
 import numpy as np
 from time import sleep
 import math
-import threading
 import serial
 import sys
 import os
@@ -27,20 +26,6 @@ class Point:
 
     def y(self):
         return (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
-
-    def xRadar(self):
-        return int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX)
-
-    def yRadar(self):
-        return int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY)
-
-    def xyRadar(self):
-        return (int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX), int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY))
-
-    def xyData(self):
-        x = (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
-        y = (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
-        return (int(x/dist2PX), int(y/dist2PX))
 
 # ---------- Functions ----------
 def distBetweenPoints(x1, y1, x2, y2):
@@ -148,9 +133,6 @@ print(laser.get_version_info())
 print("laser Ready")
 
 while laserOn:
-		if maxDist < 1000:
-			maxDist = 1000
-		
 		meters = int(maxDist/1000)
 		meterInPX = (canvasSizeX/2) / meters
 		dist2PX = maxDist/midPointX

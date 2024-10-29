@@ -81,7 +81,8 @@ def readConfig(settingsFile):
 				"minSize": 20,
 				"maxSize": 300,
 				"oscPort": 9000,
-				"oscServer": "127.0.0.1"
+				"oscServer": "127.0.0.1",
+				"oscAddress": "/cursor"
 		}
 		# Serializing json
 		json_object = json.dumps(data, indent=4)
@@ -132,6 +133,7 @@ def saveJson():
     config["oscPort"] = oscPort_text.get()
     config["oscServer"] = oscServer_text.get()
     config["debug"] = bool(debug_Check.get())
+    config["oscAddress"] = oscAddress_text.get()
     
     # Serializing json
     json_object = json.dumps(config, indent=4)
@@ -378,6 +380,7 @@ maxSize = config["maxSize"]
 oscPort = config["oscPort"]
 oscServer = config["oscServer"]
 debug = config["debug"]
+oscAddress = config["oscAddress"]
 
 # Get COM Ports
 comlist = serial.tools.list_ports.comports()
@@ -555,6 +558,11 @@ ttk.Label(tab2, text='OSC Port', font=("Arial", 12)).pack()
 oscPort_text = tk.StringVar(value=oscPort)
 oscPortEntry = ttk.Entry(tab2, textvariable=oscPort_text, font=("Arial", 12))
 oscPortEntry.pack()
+
+ttk.Label(tab2, text='OSC Address', font=("Arial", 12)).pack()
+oscAddress_text = tk.StringVar(value=oscAddress)
+oscAddressEntry = ttk.Entry(tab2, textvariable=oscAddress_text, font=("Arial", 12))
+oscAddressEntry.pack()
 
 # End Tab2
 

@@ -82,7 +82,7 @@ def readConfig(settingsFile):
 				"maxSize": 300,
 				"oscPort": 9000,
 				"oscServer": "127.0.0.1",
-				"oscAddress": "/cursor"
+				"oscAddress": "/cursorLeft"
 		}
 		# Serializing json
 		json_object = json.dumps(data, indent=4)

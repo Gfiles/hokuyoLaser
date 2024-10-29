@@ -16,7 +16,7 @@
     "tcpPort": 65432,
     "minSize": 30,
     "maxSize": 820,
-    "oscPort": "8000",
-    "oscServer": "127.0.0.1",
+    "oscPort": 9000,
+    "oscServer": "192.168.60.159",
     "oscAddress": "/cursorLeft"
 }

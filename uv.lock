@@ -22,6 +22,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "opencv-python", marker = "python_full_version >= '3.12'" },
     { name = "pyinstaller", marker = "python_full_version >= '3.12'" },
+    { name = "python-osc", marker = "python_full_version >= '3.12'" },
     { name = "setuptools", marker = "python_full_version >= '3.12'" },
 ]
 
@@ -29,6 +30,7 @@ dependencies = [
 requires-dist = [
     { name = "opencv-python", specifier = ">=4.10.0.84" },
     { name = "pyinstaller", specifier = ">=6.11.0" },
+    { name = "python-osc", specifier = ">=1.9.0" },
     { name = "setuptools", specifier = ">=75.2.0" },
 ]
 
@@ -154,6 +156,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fe/ca/218b8dc15d48e69fafef69a97a4455db7a01c01aea4eb4bf1ae8a6ad7ef9/pyinstaller_hooks_contrib-2024.9.tar.gz", hash = "sha256:4793869f370d1dc4806c101efd2890e3c3e703467d8d27bb5a3db005ebfb008d", size = 139956 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/57/b4/23338112c76750f494a2fded981d40ebd723585b2b6eadde6a821ddc7208/pyinstaller_hooks_contrib-2024.9-py3-none-any.whl", hash = "sha256:1ddf9ba21d586afa84e505bb5c65fca10b22500bf3fdb89ee2965b99da53b891", size = 336956 },
+]
+
+[[package]]
+name = "python-osc"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/c9/d529263be224e4e093f4f5903025c0014a3e8a35505d15d82660378b31ef/python_osc-1.9.0.tar.gz", hash = "sha256:ab50f66b1a19efd5bff722f26ab6450df19cdd84ba868f08c9a33e7c78514456", size = 33027 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/91/435d6a132c120136bcae4a6f3017c312acbbe41f31dc48568e9210928956/python_osc-1.9.0-py3-none-any.whl", hash = "sha256:4b16d8c4ae6a8a291037b2216a188d8654a4babe721387b8a37f89470b0c82c1", size = 43659 },
 ]
 
 [[package]]

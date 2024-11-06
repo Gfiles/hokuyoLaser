@@ -186,8 +186,8 @@ try:
 					medAng = (zone[0].angle + zone[-1].angle)/2
 					medDist = (zone[0].distance + zone[-1].distance)/2
 					#Point to send to Services
-					curX = int(((medX)/(touchWidth))*100)/100
-					curY = int(((medY)/(touchHeight))*100)/100
+					curX = medX/touchWidth
+					curY = medY/touchHeight
 					print(f"{curX}, {curY}")
 					oscClient.send_message(oscAddress, [curX, curY])
 			sleep(time2Scan)

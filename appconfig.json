@@ -3,10 +3,10 @@
     "uartSpeed": 19200,
     "debug": false,
     "minDist": 0,
-    "maxDist": 1000,
+    "maxDist": 3000,
     "minAng": -90,
     "maxAng": 90,
-    "touchWidth": 200,
+    "touchWidth": 700,
     "touchHeight": 200,
     "widthOffset": 0,
     "heightOffset": 0,
@@ -21,13 +21,23 @@
     "oscAddress": "/cursorLeft",
     "manual_zones": [
         {
-            "name": "Zone 1",
+            "name": "Left",
             "angle": -30.0,
             "distance": 500.0,
             "radius": 200.0,
             "in_event": "a",
             "on_event": "b",
             "out_event": "c"
+        },
+        {
+            "name": "Right",
+            "angle": 30.0,
+            "distance": 1000.0,
+            "radius": 200.0,
+            "in_event": "d",
+            "on_event": "e",
+            "out_event": "f"
         }
-    ]
+    ],
+    "outputType": "Zones"
 }

@@ -1,22 +1,33 @@
 {
-    "uartPort": "COM4",
+    "uartPort": "COM3",
     "uartSpeed": 19200,
     "debug": false,
-    "minDist": 200,
-    "maxDist": 2000,
+    "minDist": 0,
+    "maxDist": 1000,
     "minAng": -90,
     "maxAng": 90,
-    "touchWidth": 1300,
-    "touchHeight": 2100,
+    "touchWidth": 200,
+    "touchHeight": 200,
     "widthOffset": 0,
-    "heightOffset": 200,
+    "heightOffset": 0,
     "angleOffset": 0,
     "time2Scan": 0.1,
     "sendSpeed": 1,
     "tcpPort": 65432,
     "minSize": 30,
     "maxSize": 820,
-    "oscPort": 9000,
+    "oscPort": "9000",
     "oscServer": "192.168.60.159",
-    "oscAddress": "/cursorLeft"
+    "oscAddress": "/cursorLeft",
+    "manual_zones": [
+        {
+            "name": "Zone 1",
+            "angle": -30.0,
+            "distance": 500.0,
+            "radius": 200.0,
+            "in_event": "a",
+            "on_event": "b",
+            "out_event": "c"
+        }
+    ]
 }

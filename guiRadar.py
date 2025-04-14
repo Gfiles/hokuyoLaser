@@ -16,43 +16,56 @@ from hokuyo.driver import hokuyo
 from hokuyo.tools import serial_port
 
 # ---------- Classes ------------
+class Zone:
+	def __init__(self, angle, distance, radius, in_event, on_event, out_event, name=""):
+		self.angle = angle
+		self.distance = distance
+		self.radius = radius
+		self.in_event = in_event
+		self.on_event = on_event
+		self.out_event = out_event
+		self.name = name
+
+	def __str__(self):
+		return f"Zone at ang: {self.angle}, dist: {self.distance} with radius {self.radius}mm"
+		
 class Point:
-    def __init__(self, angle, distance) -> None:
-        self.angle = angle
-        self.distance = distance
+	def __init__(self, angle, distance) -> None:
+		self.angle = angle
+		self.distance = distance
 
-    def __str__(self):
-        return f"{self.angle} Deg - {self.distance} mm"
-    
-    def x(self):
-        return (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+	def __str__(self):
+		return f"{self.angle} Deg - {self.distance} mm"
+	
+	def x(self):
+		return (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
 
-    def xy(self):
-        return (((self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset), ((self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset))
+	def xy(self):
+		return (((self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset), ((self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset))
 
-    def y(self):
-        return (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
+	def y(self):
+		return (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
 
-    def xRadar(self):
-        return int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX)
+	def xRadar(self):
+		return int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX)
 
-    def yRadar(self):
-        return int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY)
+	def yRadar(self):
+		return int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY)
 
-    def xyRadar(self):
-        return (int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX), int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY))
+	def xyRadar(self):
+		return (int((self.distance/dist2PX * math.cos((self.angle+90) * math.pi/180))+midPointX), int((self.distance/dist2PX * math.sin((self.angle+90) * math.pi/180))+midPointY))
 
-    def xyData(self):
-        x = (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
-        y = (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
-        return (int(x/dist2PX), int(y/dist2PX))
+	def xyData(self):
+		x = (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
+		y = (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
+		return (int(x/dist2PX), int(y/dist2PX))
 
 # ---------- Functions ----------
 def distBetweenPoints(x1, y1, x2, y2):
 	return math.sqrt(((x2-x1)**2)+((y2-y1)**2))
 
 def getDist(x, y):
-    return math.sqrt(x**2+y**2)
+	return math.sqrt(x**2+y**2)
 
 def getAngle(x, y):
 	return math.atan(x/y)+((angleOffset+90)*math.pi/180)
@@ -116,31 +129,45 @@ def on_closing():
 		#sys.exit()
 
 def saveJson():
-    if uartPort_text.get() != "None":
-        config["uartPort"] = uartPort_text.get()
-    config["uartSpeed"] = int(uartSpeed_text.get())
-    config["minDist"] = int(heightOffset_text.get())
-    config["maxDist"] = int(radarMaxDist_text.get())
-    config["minAng"] = int(radarMinAng_text.get())
-    config["maxAng"] = int(radarMaxAng_text.get())
-    config["touchWidth"] = int(touchWidth_text.get())
-    config["touchHeight"] = int(touchHeight_text.get())
-    config["widthOffset"] = int(widthOffset_text.get())
-    config["heightOffset"] = int(heightOffset_text.get())
-    config["angleOffset"] = int(angleOffset_text.get())
-    config["minSize"] = int(minSize_text.get())
-    config["maxSize"] = int(maxSize_text.get())
-    config["oscPort"] = oscPort_text.get()
-    config["oscServer"] = oscServer_text.get()
-    config["debug"] = bool(debug_Check.get())
-    config["oscAddress"] = oscAddress_text.get()
-    
-    # Serializing json
-    json_object = json.dumps(config, indent=4)
-    
-    with open(settingsFile, "w") as outfile:
-        outfile.write(json_object)
-    print("Saved")
+	if uartPort_text.get() != "None":
+		config["uartPort"] = uartPort_text.get()
+	config["uartSpeed"] = int(uartSpeed_text.get())
+	config["minDist"] = int(heightOffset_text.get())
+	config["maxDist"] = int(radarMaxDist_text.get())
+	config["minAng"] = int(radarMinAng_text.get())
+	config["maxAng"] = int(radarMaxAng_text.get())
+	config["touchWidth"] = int(touchWidth_text.get())
+	config["touchHeight"] = int(touchHeight_text.get())
+	config["widthOffset"] = int(widthOffset_text.get())
+	config["heightOffset"] = int(heightOffset_text.get())
+	config["angleOffset"] = int(angleOffset_text.get())
+	config["minSize"] = int(minSize_text.get())
+	config["maxSize"] = int(maxSize_text.get())
+	config["oscPort"] = oscPort_text.get()
+	config["oscServer"] = oscServer_text.get()
+	config["debug"] = bool(debug_Check.get())
+	config["oscAddress"] = oscAddress_text.get()
+
+	# Save manual zones to JSON file for persistence
+	zones_data = []
+	for zone in manual_zones:
+		zones_data.append({
+			"name": getattr(zone, 'name', ''),
+			"angle": zone.angle,
+			"distance": zone.distance,
+			"radius": zone.radius,
+			"in_event": zone.in_event,
+			"on_event": zone.on_event,
+			"out_event": zone.out_event
+		})
+	config["manual_zones"] = zones_data
+	
+	# Serializing json
+	json_object = json.dumps(config, indent=4)
+	
+	with open(settingsFile, "w") as outfile:
+		outfile.write(json_object)
+	print("Saved")
 
 def animate_radar(stopEvent):
 	global dist2PX
@@ -151,6 +178,7 @@ def animate_radar(stopEvent):
 	global midPointX
 	global midPointY
 	global debug
+	global backGround
 	while not stopEvent.is_set():
 		minDist = int(radarMinDist_text.get())
 		maxDist = int(radarMaxDist_text.get())
@@ -291,7 +319,7 @@ def animate_radar(stopEvent):
 			#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
 			points = list()
 			lastPoint = Point(0, 0)
-			zones = list()
+			detected_zones = list()
 			newZone = False
 			for point in touchPoints:
 				distance = distBetweenPoints(point.x(), point.y(), lastPoint.x(), lastPoint.y())
@@ -303,11 +331,11 @@ def animate_radar(stopEvent):
 					newZone = True
 				else:
 					if newZone:
-						zones.append(points)
+						detected_zones.append(points)
 						newZone = False
 						points = list()
 			# iterate over all Zones to get the mediam point which will be converted to Touch Points			
-			for zone in zones:
+			for zone in detected_zones:
 				if len(zone) > 2:
 					xx1 = zone[0].x()
 					xx2 = zone[-1].x()
@@ -338,8 +366,17 @@ def animate_radar(stopEvent):
 						cv2.circle(backGround, radarPoint, 5, (255, 255, 0), -1)
 
 			image = cv2.line(backGround, radarPoints[-1].xyRadar(), radarPoints[0].xyRadar(), red, thickness)
-		# Displaying the image
+		# Draw manual zones
+		for zone in manual_zones:
+			# Convert zone position from mm to pixels
+			zone_point = Point(zone.angle, zone.distance)
+			x_px = zone_point.xRadar()
+			y_px = zone_point.yRadar()
+			#print(f"Zone Position: {zone.angle}, {zone.distance}, Converted: ({x_px}, {y_px})")
+			cv2.circle(backGround, (x_px, y_px), int(zone.radius / dist2PX), (255, 0, 0), 2)  # Blue circle
+			#cv2.circle(backGround, (665, 86), 100, (255, 0, 0), 2)  # Blue circle
 
+		# Displaying the image
 		cv2.imshow(window_name, image)
 		sleep(time2Scan)
 		if cv2.waitKey(1) == ord('q'):
@@ -417,6 +454,7 @@ print("laser Ready")
 # Window name in which image is displayed
 window_name = 'Radar Scan'
 # --- Variables
+backGround = None
 
 #Create TK window
 tkWindow = tk.Tk()
@@ -427,9 +465,11 @@ tkWindow.title("Radar Detection")
 tabControl = ttk.Notebook(tkWindow)
 tab1 = ttk.Frame(tabControl)
 tab2 = ttk.Frame(tabControl)
+tab3 = ttk.Frame(tabControl)
 
 tabControl.add(tab1, text ='Radar Settings') 
 tabControl.add(tab2, text ='Output Settings')
+tabControl.add(tab3, text ='Zones')
 tabControl.pack(expand = 1, fill ="both")
 
 # get the screen dimension
@@ -566,10 +606,217 @@ oscAddressEntry.pack()
 
 # End Tab2
 
+# Start Tab3
+tab3["padding"] = 10
+
+zones_label = ttk.Label(tab3, text="Detected Zones:", font=("Arial", 12))
+zones_label.pack(pady=5)
+
+zones_listbox = tk.Listbox(tab3, height=15, font=("Arial", 11))
+zones_listbox.pack(fill="both", expand=True, padx=10, pady=5)
+
+# Remove the multi-line text widget for zone info display
+# zone_info_text = tk.Text(tab3, height=6, width=30, font=("Arial", 11), relief="sunken")
+# zone_info_text.pack(fill="x", padx=10, pady=(0,10))
+# zone_info_text.config(state=tk.DISABLED)
+
+def update_zones_list():
+	selected = zones_listbox.curselection()
+	selected_index = selected[0] if selected else None
+	zones_listbox.delete(0, tk.END)
+	for i, zone in enumerate(manual_zones):
+		zones_listbox.insert(tk.END, zone.name)
+	if selected_index is not None and selected_index < len(manual_zones):
+		zones_listbox.selection_set(selected_index)
+		zones_listbox.activate(selected_index)
+		zones_listbox.see(selected_index)
+		# Do not update edit fields here to avoid overwriting user input
+	else:
+		angle_entry.delete(0, tk.END)
+		distance_entry.delete(0, tk.END)
+		radius_entry.delete(0, tk.END)
+		in_event_entry.delete(0, tk.END)
+		on_event_entry.delete(0, tk.END)
+		out_event_entry.delete(0, tk.END)
+
+def on_zone_select(event):
+	selected = zones_listbox.curselection()
+	if selected:
+		index = selected[0]
+		zone = manual_zones[index]
+		# Populate entries with selected zone values
+		name_entry.delete(0, tk.END)
+		name_entry.insert(0, str(zone.name))
+		angle_entry.delete(0, tk.END)
+		angle_entry.insert(0, str(zone.angle))
+		distance_entry.delete(0, tk.END)
+		distance_entry.insert(0, str(zone.distance))
+		radius_entry.delete(0, tk.END)
+		radius_entry.insert(0, str(zone.radius))
+		in_event_entry.delete(0, tk.END)
+		in_event_entry.insert(0, str(zone.in_event))
+		on_event_entry.delete(0, tk.END)
+		on_event_entry.insert(0, str(zone.on_event))
+		out_event_entry.delete(0, tk.END)
+		out_event_entry.insert(0, str(zone.out_event))
+	else:
+		name_entry.delete(0, tk.END)
+		angle_entry.delete(0, tk.END)
+		distance_entry.delete(0, tk.END)
+		radius_entry.delete(0, tk.END)
+		in_event_entry.delete(0, tk.END)
+		on_event_entry.delete(0, tk.END)
+		out_event_entry.delete(0, tk.END)
+
+zones_listbox.bind("<<ListboxSelect>>", on_zone_select)
+
+# Zone management functions
+def insert_zone():
+	# Create a new zone with default values
+	zoneName = f"Zone {len(manual_zones) + 1}"
+	new_zone = Zone(0, 100, 200, 'in_event', 'on_event', 'out_event', zoneName)
+	manual_zones.append(new_zone)
+	update_zones_list()
+
+def edit_zone():
+	selected = zones_listbox.curselection()
+	if selected:
+		index = selected[0]
+		# For now just modify the zone slightly as an example
+		zone = manual_zones[index]
+		zone.position = (zone.position[0] + 10, zone.position[1] + 10)
+		zone.radius += 5
+		update_zones_list()
+
+def delete_zone():
+	selected = zones_listbox.curselection()
+	if selected:
+		index = selected[0]
+		manual_zones.pop(index)
+		update_zones_list()
+
+# Add zone management buttons
+button_frame = ttk.Frame(tab3)
+button_frame.pack(pady=10)
+
+insert_btn = ttk.Button(button_frame, text="Insert Zone", command=insert_zone)
+insert_btn.pack(side=tk.LEFT, padx=5)
+
+# Add input fields for editing selected zone
+edit_frame = ttk.Frame(tab3)
+edit_frame.pack(pady=5, fill="x", padx=10)
+
+ttk.Label(edit_frame, text="Name:").grid(row=0, column=0, sticky="w")
+name_entry = ttk.Entry(edit_frame, width=20)
+name_entry.grid(row=0, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="Angle:").grid(row=1, column=0, sticky="w")
+angle_entry = ttk.Entry(edit_frame, width=20)
+angle_entry.grid(row=1, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="Distance:").grid(row=2, column=0, sticky="w")
+distance_entry = ttk.Entry(edit_frame, width=20)
+distance_entry.grid(row=2, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="Radius:").grid(row=3, column=0, sticky="w")
+radius_entry = ttk.Entry(edit_frame, width=20)
+radius_entry.grid(row=3, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="In Event:").grid(row=4, column=0, sticky="w")
+in_event_entry = ttk.Entry(edit_frame, width=20)
+in_event_entry.grid(row=4, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="On Event:").grid(row=5, column=0, sticky="w")
+on_event_entry = ttk.Entry(edit_frame, width=20)
+on_event_entry.grid(row=5, column=1, sticky="w")
+
+ttk.Label(edit_frame, text="Out Event:").grid(row=6, column=0, sticky="w")
+out_event_entry = ttk.Entry(edit_frame, width=20)
+out_event_entry.grid(row=6, column=1, sticky="w")
+
+def on_zone_select(event):
+	selected = zones_listbox.curselection()
+	if selected:
+		index = selected[0]
+		zone = manual_zones[index]
+		# Populate entries with selected zone values
+		name_entry.delete(0, tk.END)
+		name_entry.insert(0, getattr(zone, 'name', ''))
+		angle_entry.delete(0, tk.END)
+		angle_entry.insert(0, str(zone.angle))
+		distance_entry.delete(0, tk.END)
+		distance_entry.insert(0, str(zone.distance))
+		radius_entry.delete(0, tk.END)
+		radius_entry.insert(0, str(zone.radius))
+		in_event_entry.delete(0, tk.END)
+		in_event_entry.insert(0, str(zone.in_event))
+		on_event_entry.delete(0, tk.END)
+		on_event_entry.insert(0, str(zone.on_event))
+		out_event_entry.delete(0, tk.END)
+		out_event_entry.insert(0, str(zone.out_event))
+	else:
+		angle_entry.delete(0, tk.END)
+		distance_entry.delete(0, tk.END)
+		radius_entry.delete(0, tk.END)
+		in_event_entry.delete(0, tk.END)
+		on_event_entry.delete(0, tk.END)
+		out_event_entry.delete(0, tk.END)
+
+def save_zone():
+	selected = zones_listbox.curselection()
+	if selected:
+		index = selected[0]
+		zone = manual_zones[index]
+		try:
+			zone.name = name_entry.get()
+			zone.angle = float(angle_entry.get())
+			zone.distance = float(distance_entry.get())
+			zone.radius = float(radius_entry.get())
+			zone.in_event = in_event_entry.get()
+			zone.on_event = on_event_entry.get()
+			zone.out_event = out_event_entry.get()
+			update_zones_list()
+			# Update edit fields with saved values to keep them consistent
+			name_entry.delete(0, tk.END)
+			name_entry.insert(0, zone.name)
+			angle_entry.delete(0, tk.END)
+			angle_entry.insert(0, str(zone.angle))
+			distance_entry.delete(0, tk.END)
+			distance_entry.insert(0, str(zone.distance))
+			radius_entry.delete(0, tk.END)
+			radius_entry.insert(0, str(zone.radius))
+			in_event_entry.delete(0, tk.END)
+			in_event_entry.insert(0, str(zone.in_event))
+			on_event_entry.delete(0, tk.END)
+			on_event_entry.insert(0, str(zone.on_event))
+			out_event_entry.delete(0, tk.END)
+			out_event_entry.insert(0, str(zone.out_event))
+		except ValueError:
+			messagebox.showerror("Invalid input", "Please enter valid numeric values for angle, distance, and radius.")
+
+save_btn = ttk.Button(button_frame, text="Save Zone", command=save_zone)
+save_btn.pack(side=tk.LEFT, padx=5)
+
+delete_btn = ttk.Button(button_frame, text="Delete Zone", command=delete_zone)
+delete_btn.pack(side=tk.LEFT, padx=5)
+
+# End Tab3
+
 tk.Button(tkWindow, text="Save Settings", command = saveJson, font=("Arial", 14)).pack(pady=20)
+
+# Make zones lists global
+detected_zones = []  # For automatically detected zones
+manual_zones = []	# For manually created zones
 
 stopEvent = threading.Event()
 thread = threading.Thread(target=animate_radar, daemon=True, args=(stopEvent,))
+
+# Schedule periodic zones list updates
+def update_zones_periodically():
+	update_zones_list()
+	tkWindow.after(1000, update_zones_periodically)  # Update every second
+
+tkWindow.after(1000, update_zones_periodically)
 
 thread.start()
 

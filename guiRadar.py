@@ -159,24 +159,30 @@ def saveJson():
 	config["angleOffset"] = int(angleOffset_text.get())
 	config["minSize"] = int(minSize_text.get())
 	config["maxSize"] = int(maxSize_text.get())
-	config["oscPort"] = oscPort_text.get()
+	config["oscPort"] = int(oscPort_text.get())
 	config["oscServer"] = oscServer_text.get()
 	config["debug"] = bool(debug_Check.get())
 	config["oscAddress"] = oscAddress_text.get()
-	# Ensure output_type_var is updated before saving
+	# Ensure input_type_var is updated before saving
+	if 'input_type_var' in globals():
+		config["inputType"] = input_type_var.get()
+	else:
+		config["inputType"] = "Touch"
+
+ 	# Ensure input_type_var is updated before saving
 	if 'output_type_var' in globals():
 		config["outputType"] = output_type_var.get()
 	else:
-		config["outputType"] = "Touch"
+		config["outputType"] = "OSC"
 
-	# Save manual zones to JSON file for persistence
+ # Save manual zones to JSON file for persistence
 	zones_data = []
 	for zone in manual_zones:
 		zones_data.append({
 			"name": getattr(zone, 'name', ''),
 			"angle": zone.angle,
-			"distance": zone.distance,
-			"radius": zone.radius,
+			"distance": int(zone.distance),
+			"radius": int(zone.radius),
 			"in_event": zone.in_event,
 			"on_event": zone.on_event,
 			"out_event": zone.out_event
@@ -240,7 +246,7 @@ def animate_radar(stopEvent):
 		image = cv2.putText(backGround, "90", (2, midPointY-5), font, 0.5, color, thickness, cv2.LINE_AA)
 		image = cv2.putText(backGround, "-90", (canvasSizeX-35, midPointY-5), font, 0.5, color, thickness, cv2.LINE_AA)
 
-		if config["outputType"] == "Touch":
+		if config["inputType"] == "Touch":
 			#Draw TouchWindow
 			x1 = int((touchWidth/2)+widthOffset)
 			y1 = heightOffset
@@ -298,7 +304,7 @@ def animate_radar(stopEvent):
 				image = cv2.line(backGround, (dataWidth, 0), (dataWidth, dataHeight), yellow, 3)
 				image = cv2.line(backGround, (dataWidth, dataHeight), (0, dataHeight), yellow, 3)
 				image = cv2.line(backGround, (0, dataHeight), (0, 0), yellow, 3)
-		elif config["outputType"] == "Zones":
+		elif config["inputType"] == "Zones":
 			# Draw manual zones
 			for zone in manual_zones:
 				# Convert zone position from mm to pixels
@@ -347,13 +353,13 @@ def animate_radar(stopEvent):
 					#Draw radar
 					image = cv2.line(backGround, radarPoints[-2].xyRadar(), radarPoints[-1].xyRadar(), red, 2)
 					#Get Points in TouchArea
-					if config["outputType"] == "Touch":     
+					if config["inputType"] == "Touch":     
 						if (0 < radarPoints[-1].x() < touchWidth) and (0 < radarPoints[-1].y() < touchHeight):
 							#print(f"{int(x)},{int(y)}")
 							touchPoints.append(Point(ang, dist))
 							if debug:
 								image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
-					elif config["outputType"] == "Zones":
+					elif config["inputType"] == "Zones":
 						#Check if the point is in any of the zones
 						#for zone in manual_zones:
 							#zone.send_event = None
@@ -368,7 +374,7 @@ def animate_radar(stopEvent):
 								break
 								
 				#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
-			if config["outputType"] == "Touch":
+			if config["inputType"] == "Touch":
 				points = list()
 				lastPoint = Point(0, 0)
 				detected_zones = list()
@@ -507,34 +513,6 @@ def delete_zone():
 		manual_zones.pop(index)
 		update_zones_list()
 
-def on_zone_select(event):
-	selected = zones_listbox.curselection()
-	if selected:
-		index = selected[0]
-		zone = manual_zones[index]
-		# Populate entries with selected zone values
-		name_entry.delete(0, tk.END)
-		name_entry.insert(0, getattr(zone, 'name', ''))
-		angle_entry.delete(0, tk.END)
-		angle_entry.insert(0, str(zone.angle))
-		distance_entry.delete(0, tk.END)
-		distance_entry.insert(0, str(zone.distance))
-		radius_entry.delete(0, tk.END)
-		radius_entry.insert(0, str(zone.radius))
-		in_event_entry.delete(0, tk.END)
-		in_event_entry.insert(0, str(zone.in_event))
-		on_event_entry.delete(0, tk.END)
-		on_event_entry.insert(0, str(zone.on_event))
-		out_event_entry.delete(0, tk.END)
-		out_event_entry.insert(0, str(zone.out_event))
-	else:
-		angle_entry.delete(0, tk.END)
-		distance_entry.delete(0, tk.END)
-		radius_entry.delete(0, tk.END)
-		in_event_entry.delete(0, tk.END)
-		on_event_entry.delete(0, tk.END)
-		out_event_entry.delete(0, tk.END)
-
 def save_zone():
 	selected = zones_listbox.curselection()
 	if selected:
@@ -629,9 +607,9 @@ else:
 	manual_zones = []
 
 # Set output type dropdown value from config if present
-output_type_value = config.get("outputType", "Touch")
-if 'output_type_var' in globals():
-	output_type_var.set(output_type_value)
+input_type_value = config.get("inputType", "Touch")
+if 'input_type_var' in globals():
+	input_type_var.set(input_type_value)
 print("Loaded manual zones:", manual_zones)
 """
 # After loading zones, update the zones listbox if tkWindow is already created
@@ -816,27 +794,36 @@ debugCheckButton = tk.Checkbutton(tab2,  text="Debug", font=("Arial", 12), varia
 #debugEntry["state"] = 'readonly'
 debugCheckButton.pack()
 
+# Add label and dropdown for Input Type (Touch, Zones)
+ttk.Label(tab2, text='Input Type', font=("Arial", 12)).pack(pady=(10, 0))
+input_type_var = tk.StringVar(value=config.get("inputType", "Touch"))
+input_type_dropdown = ttk.Combobox(tab2, textvariable=input_type_var, font=("Arial", 12))
+input_type_dropdown['values'] = ("Touch", "Zones")
+input_type_dropdown['state'] = 'readonly'
+input_type_dropdown.pack()
+
+# Update config inputType on dropdown selection change
+def on_input_type_change(event):
+	config["inputType"] = input_type_var.get()
+	saveJson()
+
+input_type_dropdown.bind("<<ComboboxSelected>>", on_input_type_change)
+
 # Add label and dropdown for Output Type (Touch, Zones)
 ttk.Label(tab2, text='Output Type', font=("Arial", 12)).pack(pady=(10, 0))
-output_type_var = tk.StringVar(value=config.get("outputType", "Touch"))
+output_type_var = tk.StringVar(value=config.get("outputType", "OSC"))
 output_type_dropdown = ttk.Combobox(tab2, textvariable=output_type_var, font=("Arial", 12))
-output_type_dropdown['values'] = ("Touch", "Zones")
+output_type_dropdown['values'] = ("OSC", "TCP", "Keyboard")
 output_type_dropdown['state'] = 'readonly'
 output_type_dropdown.pack()
 
-# Update config outputType on dropdown selection change
-def on_output_type_change(event):
-	config["outputType"] = output_type_var.get()
-	saveJson()
 
-output_type_dropdown.bind("<<ComboboxSelected>>", on_output_type_change)
-
-ttk.Label(tab2, text='OSC Server', font=("Arial", 12)).pack()
+ttk.Label(tab2, text='Server IP', font=("Arial", 12)).pack()
 oscServer_text = tk.StringVar(value=oscServer)
 oscServerEntry = ttk.Entry(tab2, textvariable=oscServer_text, font=("Arial", 12))
 oscServerEntry.pack()
 
-ttk.Label(tab2, text='OSC Port', font=("Arial", 12)).pack()
+ttk.Label(tab2, text='Server Port', font=("Arial", 12)).pack()
 oscPort_text = tk.StringVar(value=oscPort)
 oscPortEntry = ttk.Entry(tab2, textvariable=oscPort_text, font=("Arial", 12))
 oscPortEntry.pack()

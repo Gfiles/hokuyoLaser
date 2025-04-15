@@ -16,28 +16,29 @@
     "tcpPort": 65432,
     "minSize": 30,
     "maxSize": 820,
-    "oscPort": "9000",
+    "oscPort": 9000,
     "oscServer": "192.168.60.159",
-    "oscAddress": "/cursorLeft",
+    "oscAddress": "/zones",
     "manual_zones": [
         {
             "name": "Left",
-            "angle": -30.0,
-            "distance": 500.0,
-            "radius": 200.0,
+            "angle": -30,
+            "distance": 400,
+            "radius": 200,
             "in_event": "a",
             "on_event": "b",
             "out_event": "c"
         },
         {
             "name": "Right",
-            "angle": 30.0,
-            "distance": 1000.0,
-            "radius": 200.0,
+            "angle": 20,
+            "distance": 1000,
+            "radius": 200,
             "in_event": "d",
             "on_event": "e",
             "out_event": "f"
         }
     ],
-    "outputType": "Zones"
+    "outputType": "TCP",
+    "inputType": "Zones"
 }

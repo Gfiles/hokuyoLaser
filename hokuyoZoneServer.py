@@ -1,60 +1,29 @@
-import numpy as np
 from time import sleep
 import math
 import serial
 import sys
 import os
 import json
-import serial.tools.list_ports
 from hokuyo.driver import hokuyo
 from hokuyo.tools import serial_port
 from pythonosc.udp_client import SimpleUDPClient # pip install python-osc
-import socket
-import threading
 from hokuyoZoneServer_tcpserver_part import TCPServer
 import pyautogui  # pip install pyautogui
 
 # ---------- Classes ------------
 class Zone:
-	def __init__(self, angle, distance, radius, in_event, on_event, out_event, name=""):
+	def __init__(self, angle, distance, radius, in_event, on_event, out_event):
 		self.angle = angle
 		self.distance = distance
 		self.radius = radius
 		self.in_event = in_event
 		self.on_event = on_event
 		self.out_event = out_event
-		self.name = name
 
 	def __str__(self):
 		return f"Zone at ang: {self.angle}, dist: {self.distance} with radius {self.radius}mm"
 
-class Point:
-    def __init__(self, angle, distance) -> None:
-        self.angle = angle
-        self.distance = distance
-
-    def __str__(self):
-        return f"{self.angle} Deg - {self.distance} mm"
-    
-    def x(self):
-        return (self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset
-
-    def xy(self):
-        return (((self.distance * math.cos((self.angle-angleOffset+90) * math.pi/180))+(touchWidth/2)+widthOffset), ((self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset))
-
-    def y(self):
-        return (self.distance * math.sin((self.angle-angleOffset+90) * math.pi/180))-heightOffset
-
 # ---------- Functions ----------
-def distBetweenPoints(x1, y1, x2, y2):
-	return math.sqrt(((x2-x1)**2)+((y2-y1)**2))
-
-def getDist(x, y):
-    return math.sqrt(x**2+y**2)
-
-def getAngle(x, y):
-	return math.atan(x/y)+((angleOffset+90)*math.pi/180)
-
 def readConfig(settingsFile):
 	if os.path.isfile(settingsFile):
 		with open(settingsFile) as json_file:
@@ -81,6 +50,8 @@ def readConfig(settingsFile):
 				"oscPort": 9000,
 				"oscServer": "192.168.60.159",
 				"oscAddress": "/zones",
+				"outputType": "Keyboard",
+				"inputType": "Zones",
 				"manual_zones": [
 					{
 						"name": "Left",
@@ -100,8 +71,8 @@ def readConfig(settingsFile):
 						"on_event": "e",
 						"out_event": "f"
 					}
-				],
-				"outputType": "Zones"
+				]
+				
 			}
 		# Serializing json
 		json_object = json.dumps(data, indent=4)
@@ -157,19 +128,7 @@ settingsFile = os.path.join(cwd, "appconfig.json")
 config = readConfig(settingsFile)
 uartPort = config["uartPort"]
 uartSpeed = config["uartSpeed"]
-minDist = config["minDist"]
-maxDist = config["maxDist"]
-minAng = config["minAng"]
-maxAng = config["maxAng"]
-touchWidth = config["touchWidth"]
-touchHeight = config["touchHeight"]
-widthOffset = config["widthOffset"]
-heightOffset = config["heightOffset"]
-angleOffset = config["angleOffset"]
 time2Scan = config["time2Scan"]
-sendSpeed = config["sendSpeed"]
-minSize = config["minSize"]
-maxSize = config["maxSize"]
 outputType = config["outputType"]
 oscPort = config["oscPort"]
 oscServer = config["oscServer"]
@@ -186,8 +145,7 @@ if "manual_zones" in config:
 			radius=zone_data.get("radius", 0),
 			in_event=zone_data.get("in_event", ""),
 			on_event=zone_data.get("on_event", ""),
-			out_event=zone_data.get("out_event", ""),
-			name=zone_data.get("name", "")
+			out_event=zone_data.get("out_event", "")
 		)
 		manual_zones.append(zone)
 else:
@@ -246,7 +204,7 @@ try:
 					
 					break
 			#check if the was no interaction and the last state was not None
-			print(f"{zone_states[i]} - {last_zone_states[i]}")
+			#print(f"{zone_states[i]} - {last_zone_states[i]}")
 			if (zone_states[i] is None) and (last_zone_states[i] is not None):
 				zone_states[i] = zone.out_event
 				#last_zone_states[i] = None

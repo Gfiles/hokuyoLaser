@@ -39,6 +39,6 @@
             "out_event": "f"
         }
     ],
-    "outputType": "TCP",
+    "outputType": "Keyboard",
     "inputType": "Zones"
 }

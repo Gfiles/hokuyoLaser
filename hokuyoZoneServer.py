@@ -9,6 +9,10 @@ import serial.tools.list_ports
 from hokuyo.driver import hokuyo
 from hokuyo.tools import serial_port
 from pythonosc.udp_client import SimpleUDPClient # pip install python-osc
+import socket
+import threading
+from hokuyoZoneServer_tcpserver_part import TCPServer
+import pyautogui  # pip install pyautogui
 
 # ---------- Classes ------------
 class Zone:
@@ -203,14 +207,17 @@ if outputType == "OSC":
 	#OSC Client Connection
 	oscClient = SimpleUDPClient(oscServer, oscPort)
 elif outputType == "TCP":
-	#TCP Client Connection
-	
-	tcpClient.connect((oscServer, oscPort))
+	#TCP Server Connection
+	tcpServer = TCPServer(port=oscPort)
+	tcpServer.start()
 
 print(laser.get_version_info())
 
 print("laser Ready")
-
+if outputType == "Keyboard":
+    print("Keyboard will be activatedin 20 seconds.")
+    sleep(20)  # Give time to switch to the target application
+    print("Keyboard mode activated. Ready to send keypresses.")
 
 try:
 	while laserOn:
@@ -224,15 +231,21 @@ try:
 			for ang in scan:
 				dist = scan[ang]
 				if distBetweenPolar(dist, ang, zone.distance, zone.angle) < zone.radius:
-					print(f"{zone.name} - {zone.on_event}")
+					if debug:
+						print(f"{zone.name} - {zone.on_event}")
 					msg = f"{zone.on_event}"
 					if outputType == "OSC":
 						oscClient.send_message(oscAddress, msg)
 					elif outputType == "TCP":
-						tcpClient.send(msg.encode())	
+						tcpServer.send(msg.encode())
+					elif outputType == "Keyboard":
+						# Simulate keypresses of the message string
+						pyautogui.typewrite(msg)
 					break
-		print("waiting")
+		#print("waiting")
 		sleep(time2Scan)
 except Exception as error:
-    print("An exception occurred:", error)
-    laser.laser_off()
+	print("An exception occurred:", error)
+	laser.laser_off()
+	tcpServer.stop()
+	laser_serial.close()

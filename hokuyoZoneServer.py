@@ -219,29 +219,44 @@ if outputType == "Keyboard":
     sleep(20)  # Give time to switch to the target application
     print("Keyboard mode activated. Ready to send keypresses.")
 
+#Create zone state list
+last_zone_states = [None for _ in range(len(manual_zones))]
 try:
 	while laserOn:
+    	# Read laser data
 		#ang = []
 		#dist = []
-		#lastDist = 1000
+		if debug:
+			print("zone_states")
+			print(last_zone_states)
 		scan = laser.get_single_scan()
-		#Create array for radar points
-		#radarPoints = list()
-		for zone in manual_zones:
+		#Create empty Zone States
+		zone_states = [None for _ in range(len(manual_zones))]
+		for i, zone in enumerate(manual_zones):
 			for ang in scan:
 				dist = scan[ang]
 				if distBetweenPolar(dist, ang, zone.distance, zone.angle) < zone.radius:
+					
+					if last_zone_states[i] is None:
+						zone_states[i] = zone.in_event
+					elif last_zone_states[i] is not None:
+						zone_states[i] = zone.on_event
 					if debug:
-						print(f"{zone.name} - {zone.on_event}")
-					msg = f"{zone.on_event}"
-					if outputType == "OSC":
-						oscClient.send_message(oscAddress, msg)
-					elif outputType == "TCP":
-						tcpServer.send(msg.encode())
-					elif outputType == "Keyboard":
-						# Simulate keypresses of the message string
-						pyautogui.typewrite(msg)
+						print(f"{zone.name} - {zone_states[i]}")
 					break
+			#check if the was no interaction and the last state was not None
+			if (zone_states[i] is None) and (last_zone_states[i] is not None):
+				zone_states[i] = zone.off_event
+			if zone_states[i] is not None:
+				if outputType == "OSC":
+					oscClient.send_message(oscAddress, zone_states[i])
+				elif outputType == "TCP":
+					tcpServer.send(zone_states[i].encode())
+				elif outputType == "Keyboard":
+					# Simulate keypresses of the message string
+					pyautogui.typewrite(zone_states[i])
+			
+			last_zone_states[i] = zone_states[i]
 		#print("waiting")
 		sleep(time2Scan)
 except Exception as error:
@@ -249,3 +264,4 @@ except Exception as error:
 	laser.laser_off()
 	tcpServer.stop()
 	laser_serial.close()
+	print("Laser turned off and serial port closed.")

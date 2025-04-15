@@ -1,7 +1,7 @@
 {
     "uartPort": "COM3",
     "uartSpeed": 19200,
-    "debug": false,
+    "debug": true,
     "minDist": 0,
     "maxDist": 3000,
     "minAng": -90,
@@ -11,7 +11,7 @@
     "widthOffset": 0,
     "heightOffset": 0,
     "angleOffset": 0,
-    "time2Scan": 0.1,
+    "time2Scan": 2,
     "sendSpeed": 1,
     "tcpPort": 65432,
     "minSize": 30,
@@ -39,6 +39,6 @@
             "out_event": "f"
         }
     ],
-    "outputType": "Keyboard",
+    "outputType": "TCP",
     "inputType": "Zones"
 }

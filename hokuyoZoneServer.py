@@ -243,10 +243,13 @@ try:
 						zone_states[i] = zone.on_event
 					if debug:
 						print(f"{zone.name} - {zone_states[i]}")
+					
 					break
 			#check if the was no interaction and the last state was not None
+			print(f"{zone_states[i]} - {last_zone_states[i]}")
 			if (zone_states[i] is None) and (last_zone_states[i] is not None):
-				zone_states[i] = zone.off_event
+				zone_states[i] = zone.out_event
+				#last_zone_states[i] = None
 			if zone_states[i] is not None:
 				if outputType == "OSC":
 					oscClient.send_message(oscAddress, zone_states[i])
@@ -255,8 +258,12 @@ try:
 				elif outputType == "Keyboard":
 					# Simulate keypresses of the message string
 					pyautogui.typewrite(zone_states[i])
+
+			if zone_states[i] == zone.out_event:
+				last_zone_states[i] = None
+			else:
+				last_zone_states[i] = zone_states[i]
 			
-			last_zone_states[i] = zone_states[i]
 		#print("waiting")
 		sleep(time2Scan)
 except Exception as error:

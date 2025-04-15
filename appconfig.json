@@ -1,7 +1,7 @@
 {
     "uartPort": "COM3",
     "uartSpeed": 19200,
-    "debug": true,
+    "debug": false,
     "minDist": 0,
     "maxDist": 3000,
     "minAng": -90,
@@ -22,8 +22,8 @@
     "manual_zones": [
         {
             "name": "Left",
-            "angle": -30,
-            "distance": 400,
+            "angle": -30.0,
+            "distance": 500,
             "radius": 200,
             "in_event": "a",
             "on_event": "b",
@@ -31,7 +31,7 @@
         },
         {
             "name": "Right",
-            "angle": 20,
+            "angle": 40.0,
             "distance": 1000,
             "radius": 200,
             "in_event": "d",
@@ -39,6 +39,6 @@
             "out_event": "f"
         }
     ],
-    "outputType": "TCP",
+    "outputType": "Keyboard",
     "inputType": "Zones"
 }

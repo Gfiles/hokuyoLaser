@@ -366,11 +366,12 @@ def animate_radar(stopEvent):
 						for zone in manual_zones:
 							#print(distBetweenPolar(dist, ang, zone.distance, zone.angle))
 							if distBetweenPolar(dist, ang, zone.distance, zone.angle) < zone.radius:
-								print(f"{zone.name} - {zone.on_event}")
+								
 								#touchPoints.append(Point(ang, dist))
 								cv2.circle(backGround, radarPoints[-1].xyRadar(), 5, (255, 255, 0), -1)
 								if debug:
 									image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
+									print(f"{zone.name} - {zone.on_event}")
 								break
 								
 				#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
@@ -414,13 +415,6 @@ def animate_radar(stopEvent):
 								cv2.putText(backGround, f"{curX}-{curY}", (int(medX/dist2PX)+10, int(medY/dist2PX)+10), font, 0.5, color, thickness, cv2.LINE_AA)
 							#Create mediam point
 							radarPoint = Point(medAng, medDist).xyRadar()
-							"""
-							if medX == 0:
-								medDist = math.sqrt((medX*medX)+(medY*medY))
-								medAng = math.atan(medY/medX)
-								radarX = int((medDist/dist2PX * math.cos((medAng+90) * math.pi/180))+midPointX)
-								radarY = int((medDist/dist2PX * math.sin((medAng+90) * math.pi/180))+midPointY)
-							"""
 							cv2.circle(backGround, radarPoint, 5, (255, 255, 0), -1)
 
 			image = cv2.line(backGround, radarPoints[-1].xyRadar(), radarPoints[0].xyRadar(), red, thickness)

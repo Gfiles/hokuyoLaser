@@ -92,7 +92,7 @@ def readConfig(settingsFile):
 			data = json.load(json_file)
 	else:
 		data = {
-				"uartPort": "COM4",
+				"uartPort": "COM3",
 				"uartSpeed": 19200,
 				"debug": False,
 				"minDist": 100,
@@ -111,7 +111,9 @@ def readConfig(settingsFile):
 				"maxSize": 300,
 				"oscPort": 9000,
 				"oscServer": "127.0.0.1",
-				"oscAddress": "/cursorLeft"
+				"oscAddress": "/cursorLeft",
+				"outputType": "TCP",
+    			"inputType": "Zones"
 		}
 		# Serializing json
 		json_object = json.dumps(data, indent=4)

@@ -44,7 +44,6 @@ def readConfig(settingsFile):
 				"angleOffset": 0,
 				"time2Scan": 0.1,
 				"sendSpeed": 1,
-				"tcpPort": 65432,
 				"minSize": 20,
 				"maxSize": 300,
 				"oscPort": 9000,
@@ -199,8 +198,7 @@ try:
 						zone_states[i] = zone.in_event
 					elif last_zone_states[i] is not None:
 						zone_states[i] = zone.on_event
-					if debug:
-						print(f"{zone.name} - {zone_states[i]}")
+
 					
 					break
 			#check if the was no interaction and the last state was not None
@@ -209,13 +207,18 @@ try:
 				zone_states[i] = zone.out_event
 				#last_zone_states[i] = None
 			if zone_states[i] is not None:
+				if debug:
+					print(f"{zone.name} - {zone_states[i]}")
 				if outputType == "OSC":
 					oscClient.send_message(oscAddress, zone_states[i])
 				elif outputType == "TCP":
 					tcpServer.send(zone_states[i].encode())
 				elif outputType == "Keyboard":
 					# Simulate keypresses of the message string
-					pyautogui.typewrite(zone_states[i])
+					if len(zone_states[i]) == 1:
+						pyautogui.press(zone_states[i])
+					else:
+						pyautogui.typewrite(zone_states[i])
 
 			if zone_states[i] == zone.out_event:
 				last_zone_states[i] = None

@@ -1,5 +1,5 @@
 {
-    "uartPort": "COM3",
+    "uartPort": "COM11",
     "uartSpeed": 19200,
     "debug": false,
     "minDist": 0,
@@ -11,7 +11,7 @@
     "widthOffset": 0,
     "heightOffset": 0,
     "angleOffset": 0,
-    "time2Scan": 2,
+    "time2Scan": 0.01,
     "sendSpeed": 1,
     "tcpPort": 65432,
     "minSize": 30,

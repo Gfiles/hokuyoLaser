@@ -348,38 +348,42 @@ def animate_radar(stopEvent):
 			radarPoints = list()
 			radarPoints.append(Point(0, 0))
 			zone_events = list()
-			for ang in scan:
-				dist = scan[ang]
-				zoneFound = False
-				if dist > maxDist:
-					dist = maxDist
-				if minDist < dist <= maxDist and minAng < ang < maxAng:
-					radarPoints.append(Point(ang, dist))
-					#Draw radar
-					image = cv2.line(backGround, radarPoints[-2].xyRadar(), radarPoints[-1].xyRadar(), red, 2)
-					#Get Points in TouchArea
-					if config["inputType"] == "Touch":     
-						if (0 < radarPoints[-1].x() < touchWidth) and (0 < radarPoints[-1].y() < touchHeight):
-							#print(f"{int(x)},{int(y)}")
-							touchPoints.append(Point(ang, dist))
-							if debug:
-								image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
-					elif config["inputType"] == "Zones":
-						#Check if the point is in any of the zones
-						#for zone in manual_zones:
-							#zone.send_event = None
-						for zone in manual_zones:
-							#print(distBetweenPolar(dist, ang, zone.distance, zone.angle))
-							if distBetweenPolar(dist, ang, zone.distance, zone.angle) < zone.radius:
-								
-								#touchPoints.append(Point(ang, dist))
-								cv2.circle(backGround, radarPoints[-1].xyRadar(), 5, (255, 255, 0), -1)
+			print(f"type of scan :{type(scan)}")
+			try:
+				for ang in scan:
+					dist = scan[ang]
+					zoneFound = False
+					if dist > maxDist:
+						dist = maxDist
+					if minDist < dist <= maxDist and minAng < ang < maxAng:
+						radarPoints.append(Point(ang, dist))
+						#Draw radar
+						image = cv2.line(backGround, radarPoints[-2].xyRadar(), radarPoints[-1].xyRadar(), red, 2)
+						#Get Points in TouchArea
+						if config["inputType"] == "Touch":     
+							if (0 < radarPoints[-1].x() < touchWidth) and (0 < radarPoints[-1].y() < touchHeight):
+								#print(f"{int(x)},{int(y)}")
+								touchPoints.append(Point(ang, dist))
 								if debug:
 									image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
-									print(f"{zone.name} - {zone.on_event}")
-								break
-								
-				#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
+						elif config["inputType"] == "Zones":
+							#Check if the point is in any of the zones
+							#for zone in manual_zones:
+								#zone.send_event = None
+							for zone in manual_zones:
+								#print(distBetweenPolar(dist, ang, zone.distance, zone.angle))
+								if distBetweenPolar(dist, ang, zone.distance, zone.angle) < zone.radius:
+									
+									#touchPoints.append(Point(ang, dist))
+									cv2.circle(backGround, radarPoints[-1].xyRadar(), 5, (255, 255, 0), -1)
+									if debug:
+										image = cv2.line(backGround, radarPoints[-2].xyData(), radarPoints[-1].xyData(), yellow, 2)
+										print(f"{zone.name} - {zone.on_event}")
+									break
+									
+					#Create Arrays ro make zones to detectar objects in area. A zone is made up area close points in scucession
+			except Exception as error:
+				print(f"Scan Error: {error}")
 			if config["inputType"] == "Touch":
 				points = list()
 				lastPoint = Point(0, 0)
